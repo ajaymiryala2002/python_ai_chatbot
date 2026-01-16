@@ -50,6 +50,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -57,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 ROOT_URLCONF = 'python_ai_agent.urls'
 
@@ -107,6 +109,21 @@ USE_TZ = True
 # STATIC_URL = 'static/'
 
 # STATIC_ROOT = BASE_DIR / "staticfiles"  # for collectstatic
+
+# URL to use when referring to static files (CSS, JS, images)
+STATIC_URL = '/static/'
+
+# Directory where collectstatic will copy all static files
+# Useful for deployment
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Optional: Additional directories where Django will search for static files
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),  # If you have a 'static/' folder in your project
+]
+
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
