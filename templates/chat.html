@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Chatbot</title>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        .user { color: blue; }
+        .bot { color: green; }
+    </style>
+</head>
+<body>
+
+<h2>AI Chatbot</h2>
+
+<div>
+    {% for msg in conversation %}
+        <p class="{{ msg.role }}">
+            <b>{{ msg.role|title }}:</b> {{ msg.content }}
+        </p>
+    {% endfor %}
+</div>
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="text" name="question" required style="width:300px;">
+    <button type="submit">Send</button>
+</form>
+
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit" name="clear">Clear Chat</button>
+</form>
+
+</body>
+</html>
