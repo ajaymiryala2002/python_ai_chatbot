@@ -1,43 +1,49 @@
-
-
 from django.shortcuts import render, redirect
-import os
 from openai import OpenAI
+from python_ai_agent import settings
 
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
-)
+
+client = OpenAI(api_key=settings.OPENAI_API_KEY)
+
+conversation = []
 
 def chat_view(request):
-
-    if "conversation" not in request.session:
-        request.session["conversation"] = []
-
-    conversation = request.session["conversation"]
+    global conversation
 
     if request.method == "POST":
 
+        # Clear chat
         if "clear" in request.POST:
-            request.session["conversation"] = []
-            request.session.modified = True
+            conversation.clear()
             return redirect("/")
 
         question = request.POST.get("question")
 
         if question:
-            conversation.append({"role": "user", "content": question})
+            conversation.append({
+                "role": "user",
+                "content": question
+            })
 
             response = client.responses.create(
                 model="gpt-4.1-mini",
                 input=[
-                    {"role": "system", "content": "You are a helpful AI assistant."},
+                    {
+                        "role": "system",
+                        "content": "You are an assistant that ALWAYS uses web search for latest and present information."
+                    },
                     *conversation
-                ]
+                ],
+                tools=[{"type": "web_search"}]
             )
 
             answer = response.output_text
 
-            conversation.append({"role": "assistant", "content": answer})
-            request.session.modified = True
+            conversation.append({
+                "role": "assistant",
+                "content": answer
+            })
 
-    return render(request, "chat.html", {"conversation": conversation})
+    return render(request, "chat.html", {
+        "conversation": conversation
+    })

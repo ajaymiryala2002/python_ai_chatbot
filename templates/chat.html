@@ -1,35 +1,179 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Chatbot</title>
     <style>
-        body { font-family: Arial; margin: 40px; }
-        .user { color: blue; }
-        .bot { color: green; }
+        /* Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .chat-body {
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 20px;
+            border-radius: 25px;
+            word-wrap: break-word;
+            font-size: 1rem;
+        }
+
+        .user {
+            background-color: #DCF8C6;
+            align-self: flex-end;
+        }
+
+        .bot {
+            background-color: #ECECEC;
+            align-self: flex-start;
+        }
+
+        .chat-footer {
+            display: flex;
+            padding: 12px;
+            background-color: #f0f0f0;
+            gap: 12px;
+        }
+
+        .chat-footer input[type="text"] {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 25px;
+            border: 1px solid #ccc;
+            outline: none;
+            font-size: 1.1rem;
+        }
+
+        .chat-footer button {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 25px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .chat-footer button:hover {
+            background-color: #45a049;
+        }
+
+        /* Clear chat button */
+        .clear-btn {
+            margin: 10px;
+            padding: 14px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background-color: #f44336;
+            border-radius: 25px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            width: calc(100% - 20px); /* full width minus margin */
+        }
+
+        .clear-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .chat-container {
+                height: 90vh;
+                border-radius: 0;
+            }
+
+            .chat-body {
+                height: 70vh;
+                padding: 10px;
+            }
+
+            .chat-footer input[type="text"] {
+                font-size: 1rem;
+                padding: 12px 18px;
+            }
+
+            .chat-footer button,
+            .clear-btn {
+                font-size: 1.1rem;
+                padding: 12px 25px;
+            }
+        }
     </style>
 </head>
 <body>
 
-<h2>AI Chatbot</h2>
+<div class="chat-container">
+    <div class="chat-header">AI Chatbot</div>
+    
+    <div class="chat-body">
+        {% for msg in conversation %}
+            <div class="message {{ msg.role }}">
+                <b>{{ msg.role|title }}:</b> {{ msg.content }}
+            </div>
+        {% endfor %}
+    </div>
 
-<div>
-    {% for msg in conversation %}
-        <p class="{{ msg.role }}">
-            <b>{{ msg.role|title }}:</b> {{ msg.content }}
-        </p>
-    {% endfor %}
+    <form method="POST" class="chat-footer">
+        {% csrf_token %}
+        <input type="text" name="question" placeholder="Type your message..." required>
+        <button type="submit">Send</button>
+    </form>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" name="clear" class="clear-btn">Clear Chat</button>
+    </form>
 </div>
 
-<form method="POST">
-    {% csrf_token %}
-    <input type="text" name="question" required style="width:300px;">
-    <button type="submit">Send</button>
-</form>
-
-<form method="POST">
-    {% csrf_token %}
-    <button type="submit" name="clear">Clear Chat</button>
-</form>
+<script>
+    // Auto scroll to bottom on page load
+    const chatBody = document.querySelector('.chat-body');
+    chatBody.scrollTop = chatBody.scrollHeight;
+</script>
 
 </body>
 </html>
