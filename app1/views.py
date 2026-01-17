@@ -4,8 +4,10 @@ from django.conf import settings
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
-def chat_view(request):
+SYSTEM_PROMPT = "You are an assistant that ALWAYS uses web search for latest and present information."
+MAX_HISTORY = 6  # Keep only last 6 messages to speed up responses
 
+def chat_view(request):
     # Create session conversation if not exists
     if "conversation" not in request.session:
         request.session["conversation"] = []
@@ -23,33 +25,25 @@ def chat_view(request):
         question = request.POST.get("question")
 
         if question:
-            conversation.append({
-                "role": "user",
-                "content": question
-            })
+            conversation.append({"role": "user", "content": question})
 
+            # Only keep last MAX_HISTORY messages to reduce latency
+            recent_messages = conversation[-MAX_HISTORY:]
+
+            # gpt-4.1-nano (FAST) - do NOT use tools
             response = client.responses.create(
-                model="gpt-4.1-mini",
+                model="gpt-4.1-nano",
                 input=[
-                    {
-                        "role": "system",
-                        "content": "You are an assistant that ALWAYS uses web search for latest and present information."
-                    },
-                    *conversation
-                ],
-                tools=[{"type": "web_search"}]
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    *recent_messages
+                ]
             )
 
             answer = response.output_text
 
-            conversation.append({
-                "role": "assistant",
-                "content": answer
-            })
+            conversation.append({"role": "assistant", "content": answer})
 
-            # IMPORTANT
+            # Save session
             request.session.modified = True
 
-    return render(request, "chat.html", {
-        "conversation": conversation
-    })
+    return render(request, "chat.html", {"conversation": conversation})
