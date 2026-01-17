@@ -1,20 +1,23 @@
 from django.shortcuts import render, redirect
 from openai import OpenAI
-from python_ai_agent import settings
-
+from django.conf import settings
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
-conversation = []
-
 def chat_view(request):
-    global conversation
+
+    # Create session conversation if not exists
+    if "conversation" not in request.session:
+        request.session["conversation"] = []
+
+    conversation = request.session["conversation"]
 
     if request.method == "POST":
 
         # Clear chat
         if "clear" in request.POST:
-            conversation.clear()
+            request.session["conversation"] = []
+            request.session.modified = True
             return redirect("/")
 
         question = request.POST.get("question")
@@ -43,6 +46,9 @@ def chat_view(request):
                 "role": "assistant",
                 "content": answer
             })
+
+            # IMPORTANT
+            request.session.modified = True
 
     return render(request, "chat.html", {
         "conversation": conversation
